@@ -10,10 +10,11 @@ import { body, validationResult } from 'express-validator';
 import compression from 'compression';
 
 import verifyRoutes from './src/routes/verify.routes.js';
+import japRoutes from './src/routes/jap.routes.js';
 
 const app = express();
 
-
+// npm run dev
 app.set('trust proxy', 1);
 app.disable('x-powered-by'); 
 
@@ -72,7 +73,7 @@ app.use(express.json({ limit: '100kb' }));
 
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-app.use('/api', verifyRoutes);
+
 
 /* Routes */
 app.get('/health', (_req, res) => {
@@ -104,6 +105,9 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
   console.warn('CSP report:', JSON.stringify(req.body));
   res.sendStatus(204);
 });
+
+app.use('/api', verifyRoutes);
+app.use('/api/jap', japRoutes);
 
 /* 404 e handler de erros */
 app.use((req, res) => res.status(404).json({ message: 'Rota não encontrada' }));

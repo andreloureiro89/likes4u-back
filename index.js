@@ -11,8 +11,11 @@ import compression from 'compression';
 
 import verifyRoutes from './src/routes/verify.routes.js';
 import japRoutes from './src/routes/jap.routes.js';
+import cartRoutes from './src/routes/cart.routes.js';
+import { connectDB } from './src/db.js';
 
 const app = express();
+await connectDB();
 
 // npm run dev
 app.set('trust proxy', 1);
@@ -108,6 +111,7 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
 
 app.use('/api', verifyRoutes);
 app.use('/api/jap', japRoutes);
+app.use('/api/cart', cartRoutes);
 
 /* 404 e handler de erros */
 app.use((req, res) => res.status(404).json({ message: 'Rota não encontrada' }));

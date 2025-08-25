@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { jap } from '../services/jap.client.js';
+import Cart from '../models/Cart.js';
 
 const router = Router();
 
@@ -30,5 +31,6 @@ router.post('/orders-status', async (req, res, next) => {
     res.json(data); // mapa de orderId -> status, se o fornecedor suportar
   } catch (e) { next(e); }
 });
+
 
 export default router;

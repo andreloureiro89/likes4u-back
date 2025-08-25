@@ -108,5 +108,27 @@ router.post('/:cartId/items', async (req, res) => {
   }
 });
 
+// DELETE /api/cart/:cartId/:orderId
+router.delete('/:cartId/:orderId', async (req, res) => {
+  try {
+    const { cartId, orderId } = req.params;
+
+    const cart = await Cart.findByIdAndUpdate(
+      cartId,
+      { $pull: { orderList: { id: orderId } } },
+      { new: true }
+    );
+    if (!cart) return res.status(404).json({ error: 'Carrinho não encontrado' });
+
+    cart.totalCart = cart.orderList.reduce((acc, item) => acc + Number(item.total || 0), 0);
+    await cart.save();
+
+    return res.json({ success: true, cart });
+  } catch (err) {
+    console.error('Erro ao remover serviço:', err);
+    res.status(500).json({ error: 'Erro interno' });
+  }
+});
+
 
 export default router;

@@ -130,5 +130,23 @@ router.delete('/:cartId/:orderId', async (req, res) => {
   }
 });
 
+// DELETE /api/cart/:cartId -> apaga o carrinho inteiro
+router.delete('/:cartId', async (req, res) => {
+  try {
+    const { cartId } = req.params;
+
+    const result = await Cart.findByIdAndDelete(cartId);
+
+    if (!result) {
+      return res.status(404).json({ error: 'Carrinho não encontrado' });
+    }
+
+    return res.json({ success: true, message: 'Carrinho removido com sucesso' });
+  } catch (err) {
+    console.error('Erro ao apagar carrinho:', err);
+    res.status(500).json({ error: 'Erro interno' });
+  }
+});
+
 
 export default router;

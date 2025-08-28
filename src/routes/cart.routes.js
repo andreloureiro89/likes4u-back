@@ -54,7 +54,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-
 // GET /cart/:id  (vai buscar um cart pelo cartId)
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
@@ -144,6 +143,39 @@ router.delete('/:cartId', async (req, res) => {
     return res.json({ success: true, message: 'Carrinho removido com sucesso' });
   } catch (err) {
     console.error('Erro ao apagar carrinho:', err);
+    res.status(500).json({ error: 'Erro interno' });
+  }
+});
+
+// PUT /api/cart/:cartId/items/:orderId  -> edita um item do carrinho
+router.put('/:cartId/items/:orderId', async (req, res) => {
+  try {
+    const { cartId, orderId } = req.params;
+    const { categoria, comments, link, quantity, service, total } = req.body;
+
+    // monta apenas os campos enviados
+    const set = {};
+    if (categoria !== undefined) set['orderList.$.categoria'] = categoria;
+    if (Array.isArray(comments)) set['orderList.$.comments'] = comments;
+    if (link !== undefined)      set['orderList.$.link'] = link;
+    if (quantity !== undefined)  set['orderList.$.quantity'] = quantity;
+    if (service !== undefined)   set['orderList.$.service'] = service;
+    if (total !== undefined)     set['orderList.$.total'] = Number(total) || 0;
+
+    const cart = await Cart.findOneAndUpdate(
+      { _id: cartId, 'orderList.id': orderId },
+      { $set: set },
+      { new: true }
+    );
+    if (!cart) return res.status(404).json({ error: 'Carrinho/serviço não encontrado' });
+
+    // recalcula total do carrinho
+    cart.totalCart = cart.orderList.reduce((acc, it) => acc + Number(it.total || 0), 0);
+    await cart.save();
+
+    return res.json({ success: true, cart });
+  } catch (err) {
+    console.error('Erro ao editar serviço:', err);
     res.status(500).json({ error: 'Erro interno' });
   }
 });
